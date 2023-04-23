@@ -1,3 +1,3 @@
 package constants
 
-const SECRET_JWT = "legal"
+const SECRET_KEY = "Ini adalah kunci rahasia"

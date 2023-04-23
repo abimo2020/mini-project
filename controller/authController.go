@@ -11,12 +11,25 @@ import (
 func LoginUserController(c echo.Context) error {
 	user := models.User{}
 	c.Bind(&user)
-	token, err := database.LoginUser(&user)
+	token, err := database.LoginUser(&user, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success login user",
+		"token":  token,
+	})
+}
+
+func LoginAdminController(c echo.Context) error {
+	user := models.User{}
+	c.Bind(&user)
+	token, err := database.LoginAdmin(&user, c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status": "success login admin",
 		"token":  token,
 	})
 }
@@ -27,7 +40,7 @@ func RegisterUserController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success create new user",
+		"message": "success to register",
 		"user":    user,
 	})
 }

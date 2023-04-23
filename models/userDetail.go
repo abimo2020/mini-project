@@ -6,4 +6,5 @@ type UserDetail struct {
 	gorm.Model
 	Alamat    string
 	Handphone string
+	UserID    uint
 }
