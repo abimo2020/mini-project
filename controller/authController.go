@@ -8,10 +8,10 @@ import (
 	"github.com/labstack/echo"
 )
 
-func LoginUserController(c echo.Context) error {
+func LoginController(c echo.Context) error {
 	user := models.User{}
 	c.Bind(&user)
-	token, err := database.LoginUser(&user, c)
+	token, err := database.Login(&user, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -21,20 +21,7 @@ func LoginUserController(c echo.Context) error {
 	})
 }
 
-func LoginAdminController(c echo.Context) error {
-	user := models.User{}
-	c.Bind(&user)
-	token, err := database.LoginAdmin(&user, c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success login admin",
-		"token":  token,
-	})
-}
-
-func RegisterUserController(c echo.Context) error {
+func RegisterController(c echo.Context) error {
 	user, err := database.Register(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
