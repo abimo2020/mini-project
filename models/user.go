@@ -4,16 +4,16 @@ import "github.com/jinzhu/gorm"
 
 type User struct {
 	gorm.Model
-	Name       string `json:"name" form:"name"`
-	Username   string `gorm:"unique"`
-	Email      string `json:"email" form:"email" gorm:"unique`
+	Name       string `json:"name" form:"name" gorm:"not null"`
+	Username   string `json:"username" form:"username" gorm:"unique;not null"`
+	Email      string `json:"email" form:"email" gorm:"unique;not null"`
 	Password   string `json:"password" form:"password"`
 	UserDetail UserDetail
-	Role       string
+	Role       string `json:"role" form:"role" gorm:"default:user"`
 }
 
 type Token struct {
-	Token string `gorm"-"`
+	Token string `gorm:"-"`
 }
 
 // func (u *User) AfterDelete(tx *gorm.DB) (err error) {

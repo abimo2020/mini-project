@@ -6,9 +6,10 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
-func CreateToken(userId int, role string) (string, error) {
+func CreateToken(userId string, role string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["user_id"] = userId
 	claims["role"] = role
@@ -30,3 +31,10 @@ func IsAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
+
+var JWTMiddlewareConfig = middleware.JWTWithConfig(middleware.JWTConfig{
+	SigningMethod: "HS256",
+	SigningKey:    []byte(constants.SECRET_KEY),
+	TokenLookup:   "cookie:JWTCookie",
+	AuthScheme:    "user",
+})

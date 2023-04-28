@@ -56,7 +56,7 @@ func InitDB() {
 }
 
 func InitialMigration() {
-	DB.AutoMigrate(&models.User{}, &models.Adoption{}, &models.Pet{}, &models.UserDetail{}, &models.PetCategory{}, &models.Token{})
+	DB.AutoMigrate(&models.User{}, &models.Adoption{}, &models.Pet{}, &models.UserDetail{}, &models.PetCategory{})
 
 	DB.Model(&models.Adoption{}).AddForeignKey("user_id", "users(id)", "CASCADE", "CASCADE").AddForeignKey("pet_id", "pets(id)", "CASCADE", "CASCADE")
 	DB.Model(&models.Pet{}).AddForeignKey("pet_category_id", "pet_categories(id)", "CASCADE", "CASCADE").AddForeignKey("user_id", "users(id)", "CASCADE", "CASCADE")

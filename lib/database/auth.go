@@ -6,22 +6,25 @@ import (
 	"mini-project/middlewares"
 	"mini-project/models"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 )
 
-func Login(user *models.User, c echo.Context) (interface{}, error) {
+func Login(c echo.Context) (interface{}, error) {
 	var err error
-	var token models.Token
-	if err = config.DB.Where("email = ? OR username = ?  AND password = ? ", user.Email, user.Username, user.Password).First(&user).Error; err != nil {
-		return nil, err
+	user := models.User{}
+	c.Bind(&user)
+
+	if err = config.DB.Where("username = ?", user.Username).Where("password = ? ", user.Password).First(&user).Error; err != nil {
+		if err = config.DB.Where("email = ?", user.Email).Where("password = ? ", user.Password).First(&user).Error; err != nil {
+			return nil, err
+		}
 	}
-	token.Token, err = middlewares.CreateToken(int(user.ID), user.Role)
-	cookie.CreateJWTCookies(c, token.Token)
+	token, err := middlewares.CreateToken(user.Username, user.Role)
+
+	cookie.CreateJWTCookies(c, token)
 
 	if err != nil {
-		return nil, err
-	}
-	if err := config.DB.Save(token).Error; err != nil {
 		return nil, err
 	}
 	return token, nil
@@ -29,10 +32,20 @@ func Login(user *models.User, c echo.Context) (interface{}, error) {
 
 func Register(c echo.Context) (interface{}, error) {
 	user := models.User{}
+
 	c.Bind(&user)
 
 	if err := config.DB.Save(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil
+}
+
+func Authorization(c echo.Context) string {
+	cookie, _ := c.Cookie("JWTCookie")
+	token, _ := jwt.Parse(cookie.Value, nil)
+	claims, _ := token.Claims.(jwt.MapClaims)
+	id := claims["user_id"].(string)
+
+	return id
 }
