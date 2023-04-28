@@ -20,7 +20,7 @@ func Login(c echo.Context) (interface{}, error) {
 			return nil, err
 		}
 	}
-	token, err := middlewares.CreateToken(user.Username, user.Role)
+	token, err := middlewares.CreateToken(user.Username, user.Role, user.ID)
 
 	cookie.CreateJWTCookies(c, token)
 
@@ -41,11 +41,11 @@ func Register(c echo.Context) (interface{}, error) {
 	return user, nil
 }
 
-func Authorization(c echo.Context) string {
+func Authorization(c echo.Context) (string, uint) {
 	cookie, _ := c.Cookie("JWTCookie")
 	token, _ := jwt.Parse(cookie.Value, nil)
 	claims, _ := token.Claims.(jwt.MapClaims)
-	id := claims["user_id"].(string)
-
-	return id
+	username := claims["username"].(string)
+	id := uint(claims["user_id"].(float64))
+	return username, id
 }

@@ -12,20 +12,20 @@ import (
 func New() *echo.Echo {
 	// create a new echo instance
 	e := echo.New()
+
 	m.LoggerMiddleware(e)
+
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	e.POST("/login", controller.LoginController)
-
 	e.POST("/register", controller.RegisterController)
 
-	e.GET("/profil", controller.GetProfilController, m.JWTMiddlewareConfig)
+	p := e.Group("/profil")
+	p.GET("", controller.GetProfilController, m.JWTMiddlewareConfig)
+	p.PUT("/update-detail", controller.UpdateProfilDetailController, m.JWTMiddlewareConfig)
+	p.PUT("/update", controller.UpdateProfilController, m.JWTMiddlewareConfig)
+	p.DELETE("/delete", controller.DeleteUserController, m.JWTMiddlewareConfig)
 
-	e.PUT("/profil/update-detail", controller.UpdateProfilDetailController, m.JWTMiddlewareConfig)
-
-	e.PUT("/profil/update", controller.UpdateProfilController, m.JWTMiddlewareConfig)
-
-	e.DELETE("/profil/delete", controller.DeleteUserController, m.JWTMiddlewareConfig)
 	// u := e.Group("/users")
 	// u.GET("", controller.GetUsersController, middleware.JWTWithConfig(middleware.JWTConfig{
 	// 	SigningMethod: "HS256",
@@ -43,11 +43,11 @@ func New() *echo.Echo {
 	// a.DELETE("/:id", controller.DeleteUserController, middleware.JWT([]byte(constants.SECRET_KEY)))
 	// a.PUT("/:id", controller.UpdateUserController, middleware.JWT([]byte(constants.SECRET_KEY)))
 
-	p := e.Group("/pets")
-	p.GET("", controller.GetPetsController)
-	p.GET("/:id", controller.GetPetController)
-	p.POST("", controller.CreatePetController)
-	p.DELETE("/:id", controller.DeletePetController)
+	// p := e.Group("/pets")
+	// p.GET("", controller.GetPetsController)
+	// p.GET("/:id", controller.GetPetController)
+	// p.POST("", controller.CreatePetController)
+	// p.DELETE("/:id", controller.DeletePetController)
 
 	return e
 }
