@@ -4,6 +4,6 @@ import "github.com/jinzhu/gorm"
 
 type Adoption struct {
 	gorm.Model
-	UserID uint
-	PetID  uint `gorm:"unique"`
+	UserID uint `json:"user_id" form:"user_id"`
+	PetID  uint `json:"pet_id" form:"pet_id" gorm:"unique"`
 }
