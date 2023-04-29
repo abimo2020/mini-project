@@ -9,24 +9,34 @@ import (
 
 func LoginController(c echo.Context) error {
 
-	token, err := database.Login(c)
+	err := database.Login(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success login user",
-		"token":  token,
 	})
 }
 
 func RegisterController(c echo.Context) error {
-	user, err := database.Register(c)
+	err := database.Register(c)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success to register",
-		"user":    user,
+	})
+}
+
+func LogoutController(c echo.Context) error {
+	err := database.Logout(c)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success to logout",
 	})
 }

@@ -11,24 +11,41 @@ import (
 // func dashboard() (interface{}, error) {
 // }
 
+func DashboardUser(c echo.Context) (interface{}, interface{}, error) {
+	var pet models.Pet
+	var adopt models.Adoption
+	var user_donate int
+	var user_adopt int
+
+	_, id := Authorization(c)
+
+	if err := config.DB.Model(&pet).Where("user_id = ?", id).Count(&user_donate).Error; err != nil {
+		return nil, nil, err
+	}
+	if err := config.DB.Model(&adopt).Where("user_id = ?", id).Count(&user_adopt).Error; err != nil {
+		return nil, nil, err
+	}
+	return user_donate, user_adopt, nil
+}
+
 func GetProfil(c echo.Context) (interface{}, error) {
 	var user models.User
-	id := Authorization(c)
+	username, _ := Authorization(c)
 
-	if err := config.DB.Where("username = ?", id).Preload("UserDetail").First(&user).Error; err != nil {
+	if err := config.DB.Where("username = ?", username).Preload("UserDetail").First(&user).Error; err != nil {
 		return nil, err
 	}
 
 	return user, nil
 }
-func UpdateProfilDetail(c echo.Context) (interface{}, error) {
+func UpdateProfilDetail(c echo.Context) error {
 	var userDetail models.UserDetail
 	var user models.User
 
-	id := Authorization(c)
+	username, _ := Authorization(c)
 
-	if err := config.DB.Where("username = ?", id).First(&user).Error; err != nil {
-		return nil, err
+	if err := config.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		return err
 	}
 	if err := config.DB.Where("user_id = ?", user.ID).First(&userDetail).Error; err != nil {
 		c.Bind(&userDetail)
@@ -37,7 +54,7 @@ func UpdateProfilDetail(c echo.Context) (interface{}, error) {
 			Handphone: userDetail.Handphone,
 			UserID:    user.ID,
 		}).Error; err != nil {
-			return nil, err
+			return err
 		}
 	} else {
 		c.Bind(&userDetail)
@@ -45,59 +62,59 @@ func UpdateProfilDetail(c echo.Context) (interface{}, error) {
 			Alamat:    userDetail.Alamat,
 			Handphone: userDetail.Handphone,
 		}).Error; err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return userDetail, nil
+	return nil
 }
 
-func UpdateProfil(c echo.Context) (interface{}, error) {
+func UpdateProfil(c echo.Context) error {
 	var user models.User
 
-	id := Authorization(c)
+	username, _ := Authorization(c)
 
 	password := c.FormValue("Password")
-	if err := config.DB.Where("username = ? AND password = ?", id, password).First(&user).Error; err != nil {
+	if err := config.DB.Where("username = ? AND password = ?", username, password).First(&user).Error; err != nil {
 
-		return nil, echo.NewHTTPError(http.StatusForbidden, "The password is wrong")
+		return echo.NewHTTPError(http.StatusBadRequest, "The password is wrong")
 	}
 	newName := c.FormValue("New Name")
 	newEmail := c.FormValue("New Email")
 	newPassword := c.FormValue("New Password")
 	retypePassword := c.FormValue("Retype Password")
 	if newPassword == retypePassword {
-		if err := config.DB.Model(&user).Where("username = ?", id).Updates(models.User{
+		if err := config.DB.Model(&user).Where("username = ?", username).Updates(models.User{
 			Name:     newName,
 			Email:    newEmail,
 			Password: newPassword,
 		}).Error; err != nil {
-			return nil, err
+			return err
 		}
 	} else {
-		return nil, echo.NewHTTPError(http.StatusForbidden, "The password is not match")
+		return echo.NewHTTPError(http.StatusBadRequest, "The password is not match")
 	}
-	return user, nil
+	return nil
 }
 
-func DeleteUser(c echo.Context) (interface{}, error) {
+func DeleteUser(c echo.Context) error {
 	var user models.User
 
-	id := Authorization(c)
+	username, _ := Authorization(c)
 
 	password := c.FormValue("Password")
-	if err := config.DB.Where("username = ? AND password = ?", id, password).First(&user).Error; err != nil {
+	if err := config.DB.Where("username = ? AND password = ?", username, password).First(&user).Error; err != nil {
 
-		return nil, echo.NewHTTPError(http.StatusForbidden, "The password is wrong")
+		return echo.NewHTTPError(http.StatusForbidden, "The password is wrong")
 	}
 
-	if err := config.DB.Where("username = ?", id).Delete(&user).Error; err != nil {
-		return nil, err
+	if err := config.DB.Where("username = ?", username).Delete(&user).Error; err != nil {
+		return err
 	}
-	return user, nil
+	return nil
 }
 
 // func DeletePet(c echo.Context) (interface{}, error) {
-// 	id, _ := strconv.Atoi(c.Param("id"))
+// 	username, _ := strconv.Atoi(c.Param("id"))
 // 	var pet models.Pet
 // 	if err := config.DB.First(&pet, id).Error; err != nil {
 // 		return nil, err

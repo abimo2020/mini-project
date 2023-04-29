@@ -9,48 +9,57 @@ import (
 	"github.com/labstack/echo"
 )
 
+func DashboardUserController(c echo.Context) error {
+	d, a, err := database.DashboardUser(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success get the data",
+		"donated": d,
+		"adopt":   a,
+	})
+}
+
 func GetProfilController(c echo.Context) error {
 	user, err := database.GetProfil(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get all pets",
+		"message": "success get the profil",
 		"user":    user,
 	})
 }
 
 func UpdateProfilDetailController(c echo.Context) error {
 
-	user, err := database.UpdateProfilDetail(c)
+	err := database.UpdateProfilDetail(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success update profil user",
-		"user":   user,
+		"status": "success update profil detail",
 	})
 }
 
 func UpdateProfilController(c echo.Context) error {
-	user, err := database.UpdateProfil(c)
+	err := database.UpdateProfil(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success update user",
-		"user":   user,
+		"status": "success update profil",
 	})
 }
 
 func DeleteUserController(c echo.Context) error {
-	user, err := database.DeleteUser(c)
+	err := database.DeleteUser(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success delete user",
-		"user":   user,
 	})
 }
 
