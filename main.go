@@ -2,6 +2,7 @@ package main
 
 import (
 	"mini-project/config"
+	"mini-project/lib/seeder"
 	route "mini-project/routes"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -10,6 +11,7 @@ import (
 func init() {
 	config.InitDB()
 	config.InitialMigration()
+	seeder.DBSeed(config.DB)
 }
 
 func main() {

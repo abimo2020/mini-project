@@ -8,9 +8,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-// func dashboard() (interface{}, error) {
-// }
-
 func DashboardUser(c echo.Context) (interface{}, interface{}, error) {
 	var pet models.Pet
 	var adopt models.Adoption
@@ -20,10 +17,10 @@ func DashboardUser(c echo.Context) (interface{}, interface{}, error) {
 	_, id := Authorization(c)
 
 	if err := config.DB.Model(&pet).Where("user_id = ?", id).Count(&user_donate).Error; err != nil {
-		return nil, nil, err
+		user_donate = 0
 	}
 	if err := config.DB.Model(&adopt).Where("user_id = ?", id).Count(&user_adopt).Error; err != nil {
-		return nil, nil, err
+		user_adopt = 0
 	}
 	return user_donate, user_adopt, nil
 }
@@ -38,6 +35,7 @@ func GetProfil(c echo.Context) (interface{}, error) {
 
 	return user, nil
 }
+
 func UpdateProfilDetail(c echo.Context) error {
 	var userDetail models.UserDetail
 	var user models.User

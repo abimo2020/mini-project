@@ -15,7 +15,7 @@ func CreateToken(username string, role string, id uint) (string, error) {
 	claims["role"] = role
 	claims["user_id"] = id
 	claims["authorized"] = true
-	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(constants.SECRET_KEY))
@@ -27,6 +27,18 @@ func IsAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 		claims := user.Claims.(jwt.MapClaims)
 		isAdmin := claims["role"].(string)
 		if isAdmin != "admin" {
+			return echo.ErrUnauthorized
+		}
+		return next(c)
+	}
+}
+
+func IsUser(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user := c.Get("user").(*jwt.Token)
+		claims := user.Claims.(jwt.MapClaims)
+		isUser := claims["role"].(string)
+		if isUser != "user" {
 			return echo.ErrUnauthorized
 		}
 		return next(c)

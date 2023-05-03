@@ -58,12 +58,57 @@ func DonateController(c echo.Context) error {
 }
 
 func AdoptController(c echo.Context) error {
-	err := database.AdoptPet(c)
+	owner, err := database.AdoptPet(c)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success adopt pet",
+		"owner":   owner,
+	})
+}
+
+func GetDonateListController(c echo.Context) error {
+	donate, err := database.GetDonateList(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success get donate list",
+		"donate":  donate,
+	})
+}
+
+func GetAdoptListController(c echo.Context) error {
+	adopt, err := database.GetAdoptList(c)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success get adopt list",
+		"adopt":   adopt,
+	})
+}
+
+func UpdatePetStatusController(c echo.Context) error {
+	err := database.UpdatePetStatus(c)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success update pet status",
+	})
+}
+
+func UpdatePetController(c echo.Context) error {
+	err := database.UpdatePet(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success update pet",
 	})
 }
