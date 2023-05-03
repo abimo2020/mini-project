@@ -57,8 +57,11 @@ func Register(c echo.Context) error {
 	if e == nil {
 		return echo.NewHTTPError(http.StatusMethodNotAllowed, "Already logged in")
 	}
-
 	c.Bind(&user)
+
+	if err := c.Validate(user); err != nil {
+		return err
+	}
 
 	if err := config.DB.Save(&user).Error; err != nil {
 		return err
