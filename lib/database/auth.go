@@ -15,10 +15,17 @@ import (
 func Login(c echo.Context) error {
 	var err error
 	user := models.User{}
-	c.Bind(&user)
+	id := c.FormValue("email/usernam")
+	password := c.FormValue("password")
 
-	if err = config.DB.Where("username = ?", user.Username).Where("password = ? ", user.Password).First(&user).Error; err != nil {
-		if err = config.DB.Where("email = ?", user.Email).Where("password = ? ", user.Password).First(&user).Error; err != nil {
+	_, e := c.Cookie("JWTCookie")
+
+	if e == nil {
+		return echo.NewHTTPError(http.StatusMethodNotAllowed, "Already logged in")
+	}
+
+	if err = config.DB.Where("username = ?", id).Where("password = ? ", password).First(&user).Error; err != nil {
+		if err = config.DB.Where("email = ?", id).Where("password = ? ", password).First(&user).Error; err != nil {
 			return err
 		}
 	}
@@ -44,6 +51,12 @@ func Logout(c echo.Context) error {
 
 func Register(c echo.Context) error {
 	user := models.User{}
+
+	_, e := c.Cookie("JWTCookie")
+
+	if e == nil {
+		return echo.NewHTTPError(http.StatusMethodNotAllowed, "Already logged in")
+	}
 
 	c.Bind(&user)
 
