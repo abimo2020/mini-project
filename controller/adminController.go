@@ -8,18 +8,14 @@ import (
 )
 
 func DashboardAdminController(c echo.Context) error {
-	totalUser, totalUserAdopt, totalUserDonate, totalPetAvailable, totalPetAdopted, err := database.DashboardAdmin(c)
+	dashboard, err := database.DashboardAdmin(c)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status":              "success get admin dashboard",
-		"total user":          totalUser,
-		"total user adopt":    totalUserAdopt,
-		"total user donate":   totalUserDonate,
-		"total pet available": totalPetAvailable,
-		"total pet adopted":   totalPetAdopted,
+		"status":    "success get admin dashboard",
+		"dashboard": dashboard,
 	})
 
 }

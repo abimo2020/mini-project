@@ -10,14 +10,13 @@ import (
 )
 
 func DashboardUserController(c echo.Context) error {
-	d, a, err := database.DashboardUser(c)
+	dashboard, err := database.DashboardUser(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success get the data",
-		"donated": d,
-		"adopt":   a,
+		"message":   "success get the data",
+		"dashboard": dashboard,
 	})
 }
 
