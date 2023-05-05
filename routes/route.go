@@ -23,15 +23,14 @@ func New() *echo.Echo {
 
 	e.GET("/dashboard", controller.DashboardUserController, m.JWTMiddlewareConfig, m.IsUser)
 	e.POST("/donate", controller.DonateController, m.JWTMiddlewareConfig, m.IsUser)
-	// e.GET("/pet-list")
-	// e.GET("/adopt-list")
 
 	e.GET("/my-donates", controller.GetDonateListController, m.JWTMiddlewareConfig, m.IsUser)
-	e.GET("/my-adopts", controller.GetAdoptListController, m.JWTMiddlewareConfig, m.IsUser)
 	e.PUT("/my-donates/:id/status/update", controller.UpdatePetStatusController, m.JWTMiddlewareConfig, m.IsUser)
 	e.PUT("/my-donates/:id/update", controller.UpdatePetController, m.JWTMiddlewareConfig, m.IsUser)
 	e.DELETE("/my-donates/:id/delete", controller.DeletePetController, m.JWTMiddlewareConfig, m.IsUser)
 
+	e.GET("/my-adopts", controller.GetAdoptListController, m.JWTMiddlewareConfig, m.IsUser)
+	
 	pets := e.Group("/pets")
 	pets.GET("", controller.GetPetsController)
 	pets.GET("/:id", controller.GetPetController)

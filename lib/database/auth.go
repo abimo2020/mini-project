@@ -5,6 +5,7 @@ import (
 	"mini-project/lib/cookie"
 	"mini-project/middlewares"
 	"mini-project/models"
+	"mini-project/models/payload"
 	"net/http"
 	"time"
 
@@ -15,8 +16,12 @@ import (
 func Login(c echo.Context) error {
 	var err error
 	user := models.User{}
-	id := c.FormValue("email/usernam")
-	password := c.FormValue("password")
+	login := payload.LoginForm{}
+	c.Bind(&login)
+
+	if err := c.Validate(login); err != nil {
+		return err
+	}
 
 	_, e := c.Cookie("JWTCookie")
 
@@ -24,8 +29,8 @@ func Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusMethodNotAllowed, "Already logged in")
 	}
 
-	if err = config.DB.Where("username = ?", id).Where("password = ? ", password).First(&user).Error; err != nil {
-		if err = config.DB.Where("email = ?", id).Where("password = ? ", password).First(&user).Error; err != nil {
+	if err = config.DB.Where("username = ?", login.ID).Where("password = ? ", login.Password).First(&user).Error; err != nil {
+		if err = config.DB.Where("email = ?", login.ID).Where("password = ? ", login.Password).First(&user).Error; err != nil {
 			return err
 		}
 	}
@@ -50,17 +55,28 @@ func Logout(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
-	user := models.User{}
 
+	register := payload.Register{}
 	_, e := c.Cookie("JWTCookie")
 
 	if e == nil {
 		return echo.NewHTTPError(http.StatusMethodNotAllowed, "Already logged in")
 	}
-	c.Bind(&user)
+	c.Bind(&register)
 
-	if err := c.Validate(user); err != nil {
+	if err := c.Validate(register); err != nil {
 		return err
+	}
+
+	if register.Password != register.RetypePassword {
+		return echo.NewHTTPError(http.StatusBadRequest, "Password not match")
+	}
+
+	user := models.User{
+		Name:     register.Name,
+		Username: register.Username,
+		Email:    register.Email,
+		Password: register.Password,
 	}
 
 	if err := config.DB.Save(&user).Error; err != nil {

@@ -3,62 +3,76 @@ package database
 import (
 	"mini-project/config"
 	"mini-project/models"
+	"mini-project/models/payload"
 	"net/http"
 
 	"github.com/labstack/echo"
 )
 
-func DashboardUser(c echo.Context) (interface{}, interface{}, error) {
+func DashboardUser(c echo.Context) (interface{}, error) {
 	var pet models.Pet
 	var adopt models.Adoption
-	var user_donate int
-	var user_adopt int
+	var dashboard payload.DashboardUser
 
 	_, id := Authorization(c)
 
-	if err := config.DB.Model(&pet).Where("user_id = ?", id).Count(&user_donate).Error; err != nil {
-		user_donate = 0
+	if err := config.DB.Model(&pet).Where("user_id = ?", id).Count(&dashboard.Donation).Error; err != nil {
+		dashboard.Donation = 0
 	}
-	if err := config.DB.Model(&adopt).Where("user_id = ?", id).Count(&user_adopt).Error; err != nil {
-		user_adopt = 0
+	if err := config.DB.Model(&adopt).Where("user_id = ?", id).Count(&dashboard.Adoption).Error; err != nil {
+		dashboard.Adoption = 0
 	}
-	return user_donate, user_adopt, nil
+	return dashboard, nil
 }
 
 func GetProfil(c echo.Context) (interface{}, error) {
 	var user models.User
+
 	username, _ := Authorization(c)
 
 	if err := config.DB.Where("username = ?", username).Preload("UserDetail").First(&user).Error; err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	profil := payload.GetProfil{
+		Name:      user.Name,
+		Username:  user.Username,
+		Email:     user.Email,
+		Alamat:    user.UserDetail.Alamat,
+		Handphone: user.UserDetail.Handphone,
+	}
+
+	return profil, nil
 }
 
 func UpdateProfilDetail(c echo.Context) error {
 	var userDetail models.UserDetail
 	var user models.User
+	var update payload.UpdateProfilDetail
 
 	username, _ := Authorization(c)
+
+	c.Bind(&update)
+
+	if err := c.Validate(&update); err != nil {
+		return err
+	}
 
 	if err := config.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		return err
 	}
 	if err := config.DB.Where("user_id = ?", user.ID).First(&userDetail).Error; err != nil {
-		c.Bind(&userDetail)
 		if err := config.DB.Model(&userDetail).Where("user_id = ?", user.ID).Save(&models.UserDetail{
-			Alamat:    userDetail.Alamat,
-			Handphone: userDetail.Handphone,
+			Alamat:    update.Alamat,
+			Handphone: update.Handphone,
 			UserID:    user.ID,
 		}).Error; err != nil {
 			return err
 		}
 	} else {
-		c.Bind(&userDetail)
 		if err := config.DB.Model(&userDetail).Where("user_id = ?", user.ID).Updates(models.UserDetail{
-			Alamat:    userDetail.Alamat,
-			Handphone: userDetail.Handphone,
+			Alamat:    update.Alamat,
+			Handphone: update.Handphone,
 		}).Error; err != nil {
 			return err
 		}
@@ -68,23 +82,25 @@ func UpdateProfilDetail(c echo.Context) error {
 
 func UpdateProfil(c echo.Context) error {
 	var user models.User
-
+	var updateProfil payload.UpdateProfil
 	username, _ := Authorization(c)
 
-	password := c.FormValue("Password")
-	if err := config.DB.Where("username = ? AND password = ?", username, password).First(&user).Error; err != nil {
+	c.Bind(&updateProfil)
+
+	if err := c.Validate(updateProfil); err != nil {
+		return err
+	}
+
+	if err := config.DB.Where("username = ? AND password = ?", username, updateProfil.Password).First(&user).Error; err != nil {
 
 		return echo.NewHTTPError(http.StatusBadRequest, "The password is wrong")
 	}
-	newName := c.FormValue("New Name")
-	newEmail := c.FormValue("New Email")
-	newPassword := c.FormValue("New Password")
-	retypePassword := c.FormValue("Retype Password")
-	if newPassword == retypePassword {
+
+	if updateProfil.NewPassword == updateProfil.RetypePassword {
 		if err := config.DB.Model(&user).Where("username = ?", username).Updates(models.User{
-			Name:     newName,
-			Email:    newEmail,
-			Password: newPassword,
+			Name:     updateProfil.Name,
+			Email:    updateProfil.Email,
+			Password: updateProfil.NewPassword,
 		}).Error; err != nil {
 			return err
 		}
@@ -110,53 +126,3 @@ func DeleteUser(c echo.Context) error {
 	}
 	return nil
 }
-
-// func DeletePet(c echo.Context) (interface{}, error) {
-// 	username, _ := strconv.Atoi(c.Param("id"))
-// 	var pet models.Pet
-// 	if err := config.DB.First(&pet, id).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	if err := config.DB.Delete(&pet, id).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return pet, nil
-// }
-
-// func UpdatePet(c echo.Context) (interface{}, error) {
-// 	id, _ := strconv.Atoi(c.Param("id"))
-// 	var pet models.Pet
-
-// 	if err := config.DB.First(&pet, id).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	c.Bind(&pet)
-// 	if err := config.DB.Model(&pet).Where("id = ?", id).Updates(models.Pet{
-// 		Name:     pet.Name,
-// 		Email:    pet.Email,
-// 		Password: pet.Password,
-// 	}).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return pet, nil
-// }
-
-// func CreatePet(c echo.Context) (interface{}, error) {
-// 	pet := models.Pet{}
-// 	c.Bind(&pet)
-
-// 	if err := config.DB.Save(&pet).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return pet, nil
-// }
-
-// func CreatePetCategory(c echo.Context) (interface{}, error) {
-// 	category := models.PetCategory{}
-// 	c.Bind(&category)
-
-// 	if err := config.DB.Save(&category).Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return category, nil
-// }

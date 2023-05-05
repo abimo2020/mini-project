@@ -10,6 +10,7 @@ import (
 func LoginController(c echo.Context) error {
 
 	err := database.Login(c)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
