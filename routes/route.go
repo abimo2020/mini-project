@@ -25,12 +25,12 @@ func New() *echo.Echo {
 	e.POST("/donate", controller.DonateController, m.JWTMiddlewareConfig, m.IsUser)
 
 	e.GET("/my-donates", controller.GetDonateListController, m.JWTMiddlewareConfig, m.IsUser)
-	e.PUT("/my-donates/:id/status/update", controller.UpdatePetStatusController, m.JWTMiddlewareConfig, m.IsUser)
-	e.PUT("/my-donates/:id/update", controller.UpdatePetController, m.JWTMiddlewareConfig, m.IsUser)
-	e.DELETE("/my-donates/:id/delete", controller.DeletePetController, m.JWTMiddlewareConfig, m.IsUser)
+	e.PUT("/my-donates/:id/status", controller.UpdatePetStatusController, m.JWTMiddlewareConfig, m.IsUser)
+	e.PUT("/my-donates/:id", controller.UpdatePetController, m.JWTMiddlewareConfig, m.IsUser)
+	e.DELETE("/my-donates/:id", controller.DeletePetController, m.JWTMiddlewareConfig, m.IsUser)
 
 	e.GET("/my-adopts", controller.GetAdoptListController, m.JWTMiddlewareConfig, m.IsUser)
-	
+
 	pets := e.Group("/pets")
 	pets.GET("", controller.GetPetsController)
 	pets.GET("/:id", controller.GetPetController)
@@ -39,9 +39,9 @@ func New() *echo.Echo {
 	p := e.Group("/profil")
 	p.Use(m.JWTMiddlewareConfig, m.IsUser)
 	p.GET("", controller.GetProfilController)
-	p.PUT("/detail/update", controller.UpdateProfilDetailController)
-	p.PUT("/update", controller.UpdateProfilController)
-	p.DELETE("/delete", controller.DeleteUserController)
+	p.PUT("/detail", controller.UpdateProfilDetailController)
+	p.PUT("", controller.UpdateProfilController)
+	p.DELETE("", controller.DeleteUserController)
 
 	a := e.Group("/admin")
 	a.Use(m.JWTMiddlewareConfig, m.IsAdmin)
@@ -49,7 +49,7 @@ func New() *echo.Echo {
 	a.GET("/users", controller.GetUsersController)
 	a.GET("/pets", controller.GetPetsAdminController)
 	a.GET("/category", controller.GetPetCategoryController)
-	e.POST("/category/create", controller.CreatePetCategoryController)
+	a.POST("/category", controller.CreatePetCategoryController)
 	// a.GET("/users/:username", controller.GetUserController)
 
 	return e

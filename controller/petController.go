@@ -1,16 +1,17 @@
 package controller
 
 import (
+	"mini-project/models/payload"
+	"mini-project/usecase"
 	"net/http"
-
-	"mini-project/lib/database"
+	"strconv"
 
 	"github.com/labstack/echo"
 )
 
 // get all pets
 func GetPetsController(c echo.Context) error {
-	pets, err := database.GetPets()
+	pets, err := usecase.GetAvailablePets()
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -23,7 +24,8 @@ func GetPetsController(c echo.Context) error {
 
 // get pet by id
 func GetPetController(c echo.Context) error {
-	pet, err := database.GetPetDetail(c)
+	id, _ := strconv.Atoi(c.Param("id"))
+	pet, err := usecase.GetPet(uint(id))
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -36,8 +38,10 @@ func GetPetController(c echo.Context) error {
 
 // delete pet by id
 func DeletePetController(c echo.Context) error {
-	err := database.DeletePet(c)
+	petId, _ := strconv.Atoi(c.Param("id"))
+	_, id := Authorization(c)
 
+	err := usecase.DeletePet(id, uint(petId))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -47,7 +51,15 @@ func DeletePetController(c echo.Context) error {
 }
 
 func DonateController(c echo.Context) error {
-	err := database.DonatePet(c)
+	var req payload.CreatePet
+	_, id := Authorization(c)
+
+	c.Bind(&req)
+
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+	err := usecase.DonatePet(&req, id)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -58,19 +70,22 @@ func DonateController(c echo.Context) error {
 }
 
 func AdoptController(c echo.Context) error {
-	owner, err := database.AdoptPet(c)
+	_, id := Authorization(c)
+	petId, _ := strconv.Atoi(c.Param("id"))
+	response, err := usecase.AdoptPet(id, uint(petId))
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "success adopt pet",
-		"owner":   owner,
+		"message":  "success adopt pet",
+		"response": response,
 	})
 }
 
 func GetDonateListController(c echo.Context) error {
-	donate, err := database.GetDonateList(c)
+	_, id := Authorization(c)
+	donate, err := usecase.GetDonates(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -81,7 +96,8 @@ func GetDonateListController(c echo.Context) error {
 }
 
 func GetAdoptListController(c echo.Context) error {
-	adopt, err := database.GetAdoptList(c)
+	_, id := Authorization(c)
+	adopt, err := usecase.GetAdoptions(id)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -93,7 +109,9 @@ func GetAdoptListController(c echo.Context) error {
 }
 
 func UpdatePetStatusController(c echo.Context) error {
-	err := database.UpdatePetStatus(c)
+	_, id := Authorization(c)
+	petId, _ := strconv.Atoi(c.Param("id"))
+	err := usecase.UpdatePetStatus(id, uint(petId))
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -104,8 +122,17 @@ func UpdatePetStatusController(c echo.Context) error {
 }
 
 func UpdatePetController(c echo.Context) error {
-	err := database.UpdatePet(c)
-	if err != nil {
+	var req payload.UpdatePet
+	_, id := Authorization(c)
+	petId, _ := strconv.Atoi(c.Param("id"))
+
+	c.Bind(&req)
+
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+
+	if err := usecase.UpdatePet(&req, id, uint(petId)); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
