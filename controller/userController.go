@@ -37,7 +37,7 @@ func UpdateProfilDetailController(c echo.Context) error {
 
 	c.Bind(&req)
 
-	if err := c.Validate(&req); err != nil {
+	if err := c.Validate(req); err != nil {
 		return err
 	}
 	err := usecase.UpdateProfilDetail(&req, id)

@@ -5,11 +5,27 @@ import (
 	"mini-project/models"
 )
 
+func GetUsers() (users []models.User, err error) {
+
+	if err := config.DB.Preload("UserDetail").Where("role = ?", "user").Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return
+}
+
 func GetUserById(id uint) (user models.User, err error) {
 	if err := config.DB.First(&user, id).Error; err != nil {
 		return models.User{}, err
 	}
 	return
+}
+
+func CountUsers() (result int) {
+	var user models.User
+	if err := config.DB.Model(&user).Where("role = ?", "user").Count(&result).Error; err != nil {
+		return 0
+	}
+	return result
 }
 
 func CountDonateUser(id uint) (result int) {
@@ -29,11 +45,9 @@ func CountAdoptUser(id uint) (result int) {
 }
 
 func GetProfil(id uint) (user models.User, err error) {
-
 	if err = config.DB.Preload("UserDetail").First(&user, id).Error; err != nil {
 		return
 	}
-
 	return
 }
 
