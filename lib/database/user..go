@@ -13,6 +13,15 @@ func GetUsers() (users []models.User, err error) {
 	return
 }
 
+func GetUserByEmailOrUsername(id string) (user models.User, err error) {
+	if err := config.DB.Where("username = ?", id).First(&user).Error; err != nil {
+		if err := config.DB.Where("email = ?", id).First(&user).Error; err != nil {
+			return models.User{}, err
+		}
+	}
+	return
+}
+
 func GetUserById(id uint) (user models.User, err error) {
 	if err := config.DB.First(&user, id).Error; err != nil {
 		return models.User{}, err
