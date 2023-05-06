@@ -12,8 +12,8 @@ func DashboardAdminController(c echo.Context) error {
 	dashboard := usecase.DashboardAdmin()
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status":    "success get admin dashboard",
-		"dashboard": dashboard,
+		"message": "success get admin dashboard",
+		"data":    dashboard,
 	})
 
 }
@@ -26,7 +26,7 @@ func GetUsersController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success get all users",
-		"users":   users,
+		"data":    users,
 	})
 }
 
@@ -36,8 +36,8 @@ func GetPetCategoryController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success get all category",
-		"category": category,
+		"message": "success get all category",
+		"data":    category,
 	})
 }
 
@@ -48,7 +48,7 @@ func GetPetsAdminController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success get all pets",
-		"pets":    response,
+		"data":    response,
 	})
 }
 

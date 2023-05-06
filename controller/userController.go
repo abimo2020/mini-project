@@ -14,8 +14,8 @@ func DashboardUserController(c echo.Context) error {
 	_, id := Authorization(c)
 	dashboard := usecase.GetDashboardUser(id)
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":   "success get the data",
-		"dashboard": dashboard,
+		"message": "success get the data",
+		"data":    dashboard,
 	})
 }
 
@@ -27,7 +27,7 @@ func GetProfilController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success get the profil",
-		"user":    user,
+		"data":    user,
 	})
 }
 
@@ -45,7 +45,7 @@ func UpdateProfilDetailController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success update profil detail",
+		"message": "success update profil detail",
 	})
 }
 
@@ -63,7 +63,7 @@ func UpdateProfilController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success update profil",
+		"message": "success update profil",
 	})
 }
 
@@ -76,6 +76,6 @@ func DeleteUserController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success delete user",
+		"message": "success delete user",
 	})
 }

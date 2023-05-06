@@ -4,6 +4,9 @@ import (
 	"mini-project/lib/database"
 	"mini-project/models"
 	"mini-project/models/payload"
+	"net/http"
+
+	"github.com/labstack/echo"
 )
 
 func DashboardAdmin() (response payload.DashboardAdmin) {
@@ -36,6 +39,7 @@ func CreatePetCategory(req *payload.CreateCategory) error {
 func GetPetCategory() (response []string, err error) {
 	category, err := database.GetPetCategory()
 	if err != nil {
+		err = echo.NewHTTPError(http.StatusBadRequest, "Don't have permission")
 		return
 	}
 	for _, value := range category {

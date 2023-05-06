@@ -18,7 +18,7 @@ func GetPetsController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success get all pets",
-		"pets":    pets,
+		"data":    pets,
 	})
 }
 
@@ -32,7 +32,7 @@ func GetPetController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success get the pet detail",
-		"pets":    pet,
+		"data":    pet,
 	})
 }
 
@@ -78,8 +78,8 @@ func AdoptController(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success adopt pet",
-		"response": response,
+		"message": "success adopt pet",
+		"data":    response,
 	})
 }
 
@@ -91,7 +91,7 @@ func GetDonateListController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success get donate list",
-		"donate":  donate,
+		"data":    donate,
 	})
 }
 
@@ -104,7 +104,7 @@ func GetAdoptListController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success get adopt list",
-		"adopt":   adopt,
+		"data":    adopt,
 	})
 }
 

@@ -91,7 +91,7 @@ func UpdatePet(req *payload.UpdatePet, id uint, petId uint) error {
 		return nil
 	}
 	if pet.UserID != id {
-		return echo.NewHTTPError(http.StatusBadRequest, "Don't have permission")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Don't have permission")
 	}
 	if err := database.UpdatePet(req, petId); err != nil {
 		return err
@@ -104,7 +104,7 @@ func UpdatePetStatus(id uint, petId uint) error {
 		return err
 	}
 	if pet.UserID != id {
-		return echo.NewHTTPError(http.StatusBadRequest, "Don't have permission")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Don't have permission")
 	}
 	if err := database.UpdatePetStatus(pet.ID, &pet); err != nil {
 		return err
@@ -118,7 +118,7 @@ func DonatePet(req *payload.CreatePet, id uint) error {
 		return err
 	}
 	if profil.UserDetail.UserID != id {
-		return echo.NewHTTPError(http.StatusBadRequest, "Fill the address and handphone before adopt or donate")
+		return echo.NewHTTPError(http.StatusNotAcceptable, "Fill the address and handphone before adopt or donate")
 	}
 	if err := database.DonatePet(req, id); err != nil {
 		return err
@@ -132,14 +132,14 @@ func AdoptPet(id uint, petId uint) (response payload.GetAdoptList, err error) {
 		return
 	}
 	if profil.UserDetail.UserID != id {
-		return response, echo.NewHTTPError(http.StatusBadRequest, "Fill the address and handphone before adopt or donate")
+		return response, echo.NewHTTPError(http.StatusNotAcceptable, "Fill the address and handphone before adopt or donate")
 	}
 	pet, err := database.GetPet(petId)
 	if err != nil {
 		return
 	}
 	if pet.UserID == id {
-		return response, echo.NewHTTPError(http.StatusBadRequest, "Owner can't adopt the pet")
+		return response, echo.NewHTTPError(http.StatusNotAcceptable, "Owner can't adopt the pet")
 	}
 	if err := database.AdoptedStatus(petId); err != nil {
 		return response, err
@@ -163,7 +163,7 @@ func DeletePet(id uint, petId uint) error {
 		return err
 	}
 	if pet.UserID != id {
-		return echo.NewHTTPError(http.StatusBadRequest, "Don't have permission")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Don't have permission")
 	}
 	if err := database.DeletePet(petId); err != nil {
 		return err

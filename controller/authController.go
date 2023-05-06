@@ -21,7 +21,7 @@ func LoginController(c echo.Context) error {
 	}
 
 	if _, err := c.Cookie("JWTCookie"); err == nil {
-		return echo.NewHTTPError(http.StatusMethodNotAllowed, "Already logged in")
+		return echo.NewHTTPError(http.StatusForbidden, "Already logged in")
 	}
 	user, err := usecase.Login(&loginForm)
 
@@ -34,7 +34,7 @@ func LoginController(c echo.Context) error {
 	}
 	cookie.CreateJWTCookies(c, token)
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success login user",
+		"message": "success login user",
 	})
 }
 
@@ -45,7 +45,7 @@ func RegisterController(c echo.Context) error {
 	_, e := c.Cookie("JWTCookie")
 
 	if e == nil {
-		return echo.NewHTTPError(http.StatusMethodNotAllowed, "Already logged in")
+		return echo.NewHTTPError(http.StatusForbidden, "Already logged in")
 	}
 
 	if err := c.Validate(registerForm); err != nil {
@@ -69,7 +69,7 @@ func RegisterController(c echo.Context) error {
 func LogoutController(c echo.Context) error {
 	cookie, err := c.Cookie("JWTCookie")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusMethodNotAllowed, "Not logged in yet")
+		return echo.NewHTTPError(http.StatusNotAcceptable, "Not logged in yet")
 	}
 	cookie.Expires = time.Now().Add(-1 * time.Hour)
 	c.SetCookie(cookie)
