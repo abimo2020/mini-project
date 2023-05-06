@@ -4,16 +4,15 @@ package controller
 import (
 	"net/http"
 
-	"mini-project/lib/database"
+	"mini-project/models/payload"
+	"mini-project/usecase"
 
 	"github.com/labstack/echo"
 )
 
 func DashboardUserController(c echo.Context) error {
-	dashboard, err := database.DashboardUser(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
+	_, id := Authorization(c)
+	dashboard := usecase.GetDashboardUser(id)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message":   "success get the data",
 		"dashboard": dashboard,
@@ -21,7 +20,8 @@ func DashboardUserController(c echo.Context) error {
 }
 
 func GetProfilController(c echo.Context) error {
-	user, err := database.GetProfil(c)
+	_, id := Authorization(c)
+	user, err := usecase.GetProfil(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -32,8 +32,15 @@ func GetProfilController(c echo.Context) error {
 }
 
 func UpdateProfilDetailController(c echo.Context) error {
+	var req payload.UpdateProfilDetail
+	_, id := Authorization(c)
 
-	err := database.UpdateProfilDetail(c)
+	c.Bind(&req)
+
+	if err := c.Validate(&req); err != nil {
+		return err
+	}
+	err := usecase.UpdateProfilDetail(&req, id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -43,7 +50,15 @@ func UpdateProfilDetailController(c echo.Context) error {
 }
 
 func UpdateProfilController(c echo.Context) error {
-	err := database.UpdateProfil(c)
+	var req payload.UpdateProfil
+	_, id := Authorization(c)
+
+	c.Bind(&req)
+
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+	err := usecase.UpdateProfil(id, &req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -53,7 +68,10 @@ func UpdateProfilController(c echo.Context) error {
 }
 
 func DeleteUserController(c echo.Context) error {
-	err := database.DeleteUser(c)
+	_, id := Authorization(c)
+
+	password := c.FormValue("password")
+	err := usecase.DeleteUser(id, password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -61,62 +79,3 @@ func DeleteUserController(c echo.Context) error {
 		"status": "success delete user",
 	})
 }
-
-// // get all pets
-// func GetPetsController(c echo.Context) error {
-// 	pets, err := database.GetPets()
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-// 	}
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"message": "success get all pets",
-// 		"pets":    pets,
-// 	})
-// }
-
-// // get pet by id
-// func GetPetController(c echo.Context) error {
-// 	pet, err := database.GetPet(c)
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-// 	}
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"message": "success get all pets",
-// 		"pets":    pet,
-// 	})
-// }
-
-// // delete pet by id
-// func DeletePetController(c echo.Context) error {
-// 	pet, err := database.DeletePet(c)
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-// 	}
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"message": "success delete pet",
-// 		"pet":     pet,
-// 	})
-// }
-// func CreatePetController(c echo.Context) error {
-// 	pet, err := database.CreatePet(c)
-// 	if err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-// 	}
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"message": "success create new pet",
-// 		"pet":     pet,
-// 	})
-// }
-
-// // update pet by id
-// // func UpdatePetController(c echo.Context) error {
-// // 	pet, err := database.UpdatePet(c)
-// // 	if err != nil {
-// // 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-// // 	}
-// // 	return c.JSON(http.StatusOK, map[string]interface{}{
-// // 		"message": "success update pet",
-// // 		"pet":     pet,
-// // 	})
-
-// // }

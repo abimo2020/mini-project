@@ -3,76 +3,54 @@ package database
 import (
 	"mini-project/config"
 	"mini-project/models"
-	"mini-project/models/payload"
-	"net/http"
-
-	"github.com/labstack/echo"
 )
 
-func DashboardUser(c echo.Context) (interface{}, error) {
+func GetUserById(id uint) (user models.User, err error) {
+	if err := config.DB.First(&user, id).Error; err != nil {
+		return models.User{}, err
+	}
+	return
+}
+
+func CountDonateUser(id uint) (result int) {
 	var pet models.Pet
+	if err := config.DB.Model(&pet).Where("user_id = ?", id).Count(&result).Error; err != nil {
+		return 0
+	}
+	return
+}
+
+func CountAdoptUser(id uint) (result int) {
 	var adopt models.Adoption
-	var dashboard payload.DashboardUser
-
-	_, id := Authorization(c)
-
-	if err := config.DB.Model(&pet).Where("user_id = ?", id).Count(&dashboard.Donation).Error; err != nil {
-		dashboard.Donation = 0
+	if err := config.DB.Model(&adopt).Where("user_id = ?", id).Count(&result).Error; err != nil {
+		return 0
 	}
-	if err := config.DB.Model(&adopt).Where("user_id = ?", id).Count(&dashboard.Adoption).Error; err != nil {
-		dashboard.Adoption = 0
-	}
-	return dashboard, nil
+	return
 }
 
-func GetProfil(c echo.Context) (interface{}, error) {
-	var user models.User
+func GetProfil(id uint) (user models.User, err error) {
 
-	username, _ := Authorization(c)
-
-	if err := config.DB.Where("username = ?", username).Preload("UserDetail").First(&user).Error; err != nil {
-		return nil, err
+	if err = config.DB.Preload("UserDetail").First(&user, id).Error; err != nil {
+		return
 	}
 
-	profil := payload.GetProfil{
-		Name:      user.Name,
-		Username:  user.Username,
-		Email:     user.Email,
-		Alamat:    user.UserDetail.Alamat,
-		Handphone: user.UserDetail.Handphone,
-	}
-
-	return profil, nil
+	return
 }
 
-func UpdateProfilDetail(c echo.Context) error {
+func UpdateProfilDetail(req *models.UserDetail, id uint) error {
 	var userDetail models.UserDetail
-	var user models.User
-	var update payload.UpdateProfilDetail
-
-	username, _ := Authorization(c)
-
-	c.Bind(&update)
-
-	if err := c.Validate(&update); err != nil {
-		return err
-	}
-
-	if err := config.DB.Where("username = ?", username).First(&user).Error; err != nil {
-		return err
-	}
-	if err := config.DB.Where("user_id = ?", user.ID).First(&userDetail).Error; err != nil {
-		if err := config.DB.Model(&userDetail).Where("user_id = ?", user.ID).Save(&models.UserDetail{
-			Alamat:    update.Alamat,
-			Handphone: update.Handphone,
-			UserID:    user.ID,
+	if err := config.DB.Where("user_id = ?", id).First(&userDetail).Error; err != nil {
+		if err := config.DB.Model(&userDetail).Where("user_id = ?", id).Save(&models.UserDetail{
+			Alamat:    req.Alamat,
+			Handphone: req.Handphone,
+			UserID:    id,
 		}).Error; err != nil {
 			return err
 		}
 	} else {
-		if err := config.DB.Model(&userDetail).Where("user_id = ?", user.ID).Updates(models.UserDetail{
-			Alamat:    update.Alamat,
-			Handphone: update.Handphone,
+		if err := config.DB.Model(&userDetail).Where("user_id = ?", id).Updates(models.UserDetail{
+			Alamat:    req.Alamat,
+			Handphone: req.Handphone,
 		}).Error; err != nil {
 			return err
 		}
@@ -80,48 +58,22 @@ func UpdateProfilDetail(c echo.Context) error {
 	return nil
 }
 
-func UpdateProfil(c echo.Context) error {
-	var user models.User
-	var updateProfil payload.UpdateProfil
-	username, _ := Authorization(c)
+func UpdateProfil(req *models.User, username string) error {
 
-	c.Bind(&updateProfil)
-
-	if err := c.Validate(updateProfil); err != nil {
+	if err := config.DB.Model(&req).Where("username = ?", username).Updates(models.User{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: req.Password,
+	}).Error; err != nil {
 		return err
 	}
 
-	if err := config.DB.Where("username = ? AND password = ?", username, updateProfil.Password).First(&user).Error; err != nil {
-
-		return echo.NewHTTPError(http.StatusBadRequest, "The password is wrong")
-	}
-
-	if updateProfil.NewPassword == updateProfil.RetypePassword {
-		if err := config.DB.Model(&user).Where("username = ?", username).Updates(models.User{
-			Name:     updateProfil.Name,
-			Email:    updateProfil.Email,
-			Password: updateProfil.NewPassword,
-		}).Error; err != nil {
-			return err
-		}
-	} else {
-		return echo.NewHTTPError(http.StatusBadRequest, "The password is not match")
-	}
 	return nil
 }
 
-func DeleteUser(c echo.Context) error {
+func DeleteUser(id uint) error {
 	var user models.User
-
-	username, _ := Authorization(c)
-
-	password := c.FormValue("Password")
-	if err := config.DB.Where("username = ? AND password = ?", username, password).First(&user).Error; err != nil {
-
-		return echo.NewHTTPError(http.StatusForbidden, "The password is wrong")
-	}
-
-	if err := config.DB.Where("username = ?", username).Delete(&user).Error; err != nil {
+	if err := config.DB.Delete(&user, id).Error; err != nil {
 		return err
 	}
 	return nil
