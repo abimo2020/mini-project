@@ -1,18 +1,16 @@
 package controller
 
 import (
-	"mini-project/lib/database"
+	"mini-project/models/payload"
+	"mini-project/usecase"
 	"net/http"
 
 	"github.com/labstack/echo"
 )
 
 func DashboardAdminController(c echo.Context) error {
-	dashboard, err := database.DashboardAdmin(c)
+	dashboard := usecase.DashboardAdmin()
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":    "success get admin dashboard",
 		"dashboard": dashboard,
@@ -21,7 +19,7 @@ func DashboardAdminController(c echo.Context) error {
 }
 
 func GetUsersController(c echo.Context) error {
-	users, err := database.GetUsers(c)
+	users, err := usecase.GetUsers()
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -33,8 +31,7 @@ func GetUsersController(c echo.Context) error {
 }
 
 func GetPetCategoryController(c echo.Context) error {
-	category, err := database.GetPetCategory(c)
-
+	category, err := usecase.GetPetCategory()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -45,19 +42,23 @@ func GetPetCategoryController(c echo.Context) error {
 }
 
 func GetPetsAdminController(c echo.Context) error {
-	pets, err := database.GetPetsAdmin(c)
-
+	response, err := usecase.GetPets()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "success get all pets",
-		"pets":    pets,
+		"pets":    response,
 	})
 }
 
 func CreatePetCategoryController(c echo.Context) error {
-	err := database.CreatePetCategory(c)
+	var req payload.CreateCategory
+	c.Bind(&req)
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+	err := usecase.CreatePetCategory(&req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
