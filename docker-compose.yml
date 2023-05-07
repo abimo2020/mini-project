@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: mysql
+    image: mysql:latest
+    ports:
+      - 3307:3306
+    networks:
+      - api_server
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=crud_go
+      # - DATABASE_HOST=db
+
+  api:
+    container_name: api
+    image: abimo2020/mini-project:v1
+    restart: on-failure
+    ports:
+      - 80:8080
+    depends_on:
+      - db
+    # links:
+    #   - db
+    environment:
+      - DB_NAME=crud_go
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DB_PORT=3306
+      - DB_HOST=db
+    networks:
+      - api_server
+
+networks:
+  api_server:
+    name: api_server
+
+# docker container create --name api -e DB_NAME=crud_go -e DB_USER=root -e DB_PASSWORD=root -e DB_PORT=3307 -e DB_HOST=Amboksing -p 8080:8080 backend:latest
+# docker container create --name db -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=crud_go -p 3307:3306 mysql:latest
