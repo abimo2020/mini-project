@@ -22,15 +22,19 @@ type GetProfil struct {
 }
 
 type GetPet struct {
+	ID        uint   `json:"id" form:"id"`
 	Deskripsi string `json:"deskripsi" form:"deskripsi"`
 	Status    string `json:"status" form:"status"`
 	Category  string `json:"category" form:"category"`
-}
-
-type GetAdoptList struct {
-	Deskripsi string `json:"deskripsi" form:"deskrips"`
-	Category  string `json:"category" form:"category"`
+	OwnerID   uint   `json:"owner_id" form:"owner_id"`
 	Owner     string `json:"owner" form:"owner"`
 	Handphone string `json:"handphone" form:"handphone"`
 	Alamat    string `json:"alamat" form:"alamat"`
+}
+
+type GetDonateList struct {
+	ID        uint   `json:"id" form:"id"`
+	Deskripsi string `json:"deskripsi" form:"deskrips"`
+	Status    string `json:"status" form:"status"`
+	Category  string `json:"category" form:"category"`
 }

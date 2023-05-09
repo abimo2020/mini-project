@@ -7,14 +7,14 @@ import (
 )
 
 func GetAvailablePets() (pets []models.Pet, err error) {
-	if err := config.DB.Preload("PetCategory").Where("status = ?", "available").Find(&pets).Error; err != nil {
+	if err := config.DB.Preload("PetCategory").Preload("User.UserDetail").Where("status = ?", "available").Find(&pets).Error; err != nil {
 		return []models.Pet{}, err
 	}
 	return pets, nil
 }
 
 func GetPets() (pets []models.Pet, err error) {
-	if err := config.DB.Preload("PetCategory").Find(&pets).Error; err != nil {
+	if err := config.DB.Preload("PetCategory").Preload("User.UserDetail").Find(&pets).Error; err != nil {
 		return []models.Pet{}, err
 	}
 	return pets, nil
@@ -29,7 +29,7 @@ func GetPet(id uint) (pet models.Pet, err error) {
 }
 
 func GetDonateList(id uint) (user models.User, err error) {
-	if err := config.DB.Preload("Pet.PetCategory").First(&user, id).Error; err != nil {
+	if err := config.DB.Preload("Pet.PetCategory").Preload("Adoption.User.UserDetail").First(&user, id).Error; err != nil {
 		return models.User{}, err
 	}
 	return user, nil
@@ -54,23 +54,16 @@ func UpdatePet(req *payload.UpdatePet, id uint) error {
 	return nil
 }
 
-func UpdatePetStatus(id uint, pet *models.Pet) error {
-	if pet.Status == "available" {
-		if err := config.DB.Model(&pet).Where("id = ?", id).Update(models.Pet{
-			Status: "adopted",
-		}).Error; err != nil {
-			return err
-		}
-	} else {
-		if err := config.DB.Model(&pet).Where("id = ?", id).Update(models.Pet{
-			Status: "available",
-		}).Error; err != nil {
-			return err
-		}
+func UpdateAvailableStatus(id uint) error {
+	var pet models.Pet
+	if err := config.DB.Model(&pet).Where("id = ? AND status = ?", id, "adopted").Update(models.Pet{
+		Status: "available",
+	}).Error; err != nil {
+		return err
 	}
 	return nil
 }
-func AdoptedStatus(id uint) error {
+func UpdateAdoptedStatus(id uint) error {
 	var pet models.Pet
 	if err := config.DB.Model(&pet).Where("id = ? AND status = ?", id, "available").Update(models.Pet{
 		Status: "adopted",
