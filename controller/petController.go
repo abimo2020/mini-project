@@ -111,7 +111,7 @@ func GetAdoptListController(c echo.Context) error {
 func UpdatePetStatusController(c echo.Context) error {
 	_, id := Authorization(c)
 	petId, _ := strconv.Atoi(c.Param("id"))
-	err := usecase.UpdatePetStatus(id, uint(petId))
+	err := usecase.UpdateAvailableStatus(id, uint(petId))
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
