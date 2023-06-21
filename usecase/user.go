@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func GetDashboardUser(id uint) payload.DashboardUser {
@@ -46,22 +47,26 @@ func UpdateProfilDetail(req *payload.UpdateProfilDetail, id uint) error {
 }
 
 func UpdateProfil(id uint, req *payload.UpdateProfil) error {
-	profil := models.User{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: req.NewPassword,
+	if req.NewPassword != req.RetypePassword {
+		return echo.NewHTTPError(http.StatusBadRequest, "The password is not match")
 	}
 	user, err := database.GetUserById(id)
 	if err != nil {
 		return err
 	}
-	if user.Password != req.Password {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "The password is wrong")
 	}
-	if req.NewPassword != req.RetypePassword {
-		return echo.NewHTTPError(http.StatusBadRequest, "The password is not match")
+	newPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "fail hashing the password")
 	}
 
+	profil := models.User{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: string(newPassword),
+	}
 	if err := database.UpdateProfil(&profil, user.Username); err != nil {
 		return err
 	}
@@ -73,7 +78,7 @@ func DeleteUser(id uint, password string) error {
 	if err != nil {
 		return err
 	}
-	if user.Password != password {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "The password is wrong")
 	}
 	if err := database.DeleteUser(id); err != nil {
